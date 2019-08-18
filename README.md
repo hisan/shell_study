@@ -1,1 +1,1 @@
-# shell_study
+record the process of study shell script .
