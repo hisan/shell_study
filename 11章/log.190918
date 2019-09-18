@@ -1,4 +1,6 @@
-总用量 8
+总用量 16
+-rw-r--r--. 1 root root 962 9月  18 16:24 190918
 -rwxrwxrwx. 1  777 root  72 8月  18 21:29 1.sh
 -rwxrwxrwx. 1 root root 142 9月  18 15:54 examble.bash
--rw-r--r--. 1 root root   0 9月  18 15:54 log.190918
+-rwxr--r--. 1 root root  74 9月  18 15:56 git.sh
+-rw-r--r--. 1 root root   0 9月  18 22:21 log.190918
