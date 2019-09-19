@@ -50,17 +50,3 @@ do
 	done 
 done 
 
-
-#进行统计
-total=0
-for num in $(cat $code_dir)
-do 
-	total=$[$total+$num]
-done 
-echo "the all code lines under the directory:$1 is :$total"
-
-rm -f $first_dir
-rm -f $second_dir
-rm -f $code_dir
-
- 
