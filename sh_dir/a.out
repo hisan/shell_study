@@ -1,0 +1,17 @@
+Script process ID:10870
+Loop #1
+Loop #2
+Loop #3
+Loop #4
+End
+2019年 10月 13日 星期日 19:38:56 CST
+zhangyb  tty1         2019-10-13 14:21
+root     pts/4        2019-10-13 14:22 (192.168.67.1)
+root     pts/6        2019-10-13 14:22 (192.168.67.1)
+root     pts/7        2019-10-13 14:22 (192.168.67.1)
+root     pts/8        2019-10-13 14:22 (192.168.67.1)
+root     pts/9        2019-10-13 14:28 (192.168.67.1)
+Line #1:this is first line!
+Line #2:this is second line!
+Line #3:this is third line!
+Line #4:this is four line!`
