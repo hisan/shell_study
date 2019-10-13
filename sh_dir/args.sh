@@ -20,8 +20,8 @@ echo -n "Let's try adding just one number: "
 value=$(addem 10)
 echo $value 
 
-echo -n "Let's try adding just one number: "
-value=$(addem 10)
+echo -n "Try adding no number: "
+value=$(addem)
 echo $value 
 
 echo -n "Finally,try adding three numbers: "
