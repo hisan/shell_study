@@ -1,0 +1,7 @@
+addem() {
+	echo $[ $1 + $2 ]
+}
+
+multem() {
+	echo $[ $1 * $2 ]	
+}
