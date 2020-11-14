@@ -9,10 +9,10 @@ then
 	exit 127
 fi 
 
-basepath="/home/zhangyb/"
-first_dir="/home/zhangyb/first_dir.txt"
-second_dir="/home/zhangyb/dir.txt"
-code_dir="/home/zhangyb/code.txt"
+basepath="/home/zyb/"
+first_dir="/home/zyb/first_dir.txt"
+second_dir="/home/zyb/dir.txt"
+code_dir="/home/zyb/code.txt"
 
 #将我们要进行代码统计的根目录的所有目录及文件拷贝到$first_dir中
 ls -R $realpath >> $first_dir
@@ -44,6 +44,9 @@ do
 				cat $dir$subdir | wc -l >> $code_dir
 			elif [[ "$dir$subdir" == *.h ]]
 			then 
+				cat $dir$subdir | wc -l >> $code_dir
+			elif [[ "$dir$subdir" == *.cpp ]]
+			then
 				cat $dir$subdir | wc -l >> $code_dir
 			fi
 		fi
