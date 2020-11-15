@@ -1,4 +1,0 @@
-/usr/mail
-/usr2/mail
-$$$
-\\\

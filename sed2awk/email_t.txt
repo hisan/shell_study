@@ -1,0 +1,6 @@
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Newsgroups: fa.linux.kernel
+Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7
+Date: Thu, 05 Jul 2007 23:09:49 UTC
+Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>
+
