@@ -235,6 +235,116 @@ sed的基本命令:
 	
 	追加、插入命令只应用于单个行地址，更改命令可以处理一个范围内的行。
 	
+		1) 更改
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat email_t.txt
+			From: Linus Torvalds <torvalds@linux-foundation.org>
+			Newsgroups: fa.linux.kernel
+			Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7
+			Date: Thu, 05 Jul 2007 23:09:49 UTC
+			Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>
+
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '/^From/,/^$/c\
+			<Mail Header Removed>' email_t.txt
+			<Mail Header Removed>
+			
+		2) 插入和追加: 此两个命令不影响模式空间的内容,提供的文本将不匹配脚本中的后续命令中的任何地址。
+		
+			示例1.追加
+			
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '/^From/a\
+				this is a test insert txt!' email_t.txt
+				
+				From: Linus Torvalds <torvalds@linux-foundation.org>
+				this is a test insert txt!(追加的行，这表示追加总是追加在模式行之后)
+				Newsgroups: fa.linux.kernel
+				Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7
+				Date: Thu, 05 Jul 2007 23:09:49 UTC
+				Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>
+
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat email_t.txt
+				From: Linus Torvalds <torvalds@linux-foundation.org>
+				Newsgroups: fa.linux.kernel
+				Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7
+				Date: Thu, 05 Jul 2007 23:09:49 UTC
+				Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>
+		
+			示例2.插入
+
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '/^From/i\
+				this is a insert test txt!' email_t.txt
+				this is a insert test txt! (插入的行，这表示插入总是插入在模式行之前)
+				From: Linus Torvalds <torvalds@linux-foundation.org>
+				Newsgroups: fa.linux.kernel
+				Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7
+				Date: Thu, 05 Jul 2007 23:09:49 UTC
+				Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>
+
+				
+列表 	
+		|		用于显示模式空间的内容，将非打印的字符显示为两个数字的ASCII代码.
+
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed -n -e "l" email_t.txt
+				From: Linus Torvalds <torvalds@linux-foundation.org>$
+				Newsgroups: fa.linux.kernel$
+				Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7$
+				Date: Thu, 05 Jul 2007 23:09:49 UTC$
+				Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>$
+				$
+
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed -e "l" email_t.txt
+				From: Linus Torvalds <torvalds@linux-foundation.org>$
+				From: Linus Torvalds <torvalds@linux-foundation.org>
+				Newsgroups: fa.linux.kernel$
+				Newsgroups: fa.linux.kernel
+				Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7$
+				Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7
+				Date: Thu, 05 Jul 2007 23:09:49 UTC$
+				Date: Thu, 05 Jul 2007 23:09:49 UTC
+				Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>$
+				Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>
+				$
+
+转换
+		此命令将字符串abc中的每个字符，都转换成字符串xyz中的等价字符。(所以互相转换的字符串长度必须相等)
+		
+	[address]y/abc/xyz/   这里的转换单位是字符，两个字符串是互相对照的。
+	
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat a.txt
+			12345611223344
+			abcedf
+
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed 'y/123/abc/' a.txt
+			abc456aabbcc44
+			abcedf
+
+打印行号
+		[line-address]=
+		
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '1,$=' a.txt
+			1
+			12345611223344
+			2
+			abcedf
+			3
+
+下一步 next next改变了正常的流控制，直到到达脚本的底部才会输出模式空间的内容。
+
+		[address]n
+			
+			128page
+			
+
+				
+	
+				
+
+
+
+
+		
+			
+	
+	
 	
 	
 	
