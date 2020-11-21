@@ -86,6 +86,7 @@ awk
 						root@zyb-ubt:~# cat abc.txt grep '^a' 
 						abcklmalamcamscabcmkkascmlkascml kacmlamc
 						aa\asc!sdfvwle Eb#≤adviqwefredfbs db(sadcv)w
+						
 			?	:	匹配前面表达式的0或1次出现
 			
 			\(n,m\}		:		匹配它前面出现x次的单个字符
@@ -98,6 +99,7 @@ awk
 				
 
 			\			:	转义它之后跟的一个字符
+			
 			|			:	或,Astring|Bstring,即匹配Astring或者Bstring的匹配行
 			
 						root@zyb-ubt:~# cat ex.txt
@@ -117,7 +119,17 @@ awk
 						
 						root@zyb-ubt:~# sed -n '/big\( house\)/p' ex.txt
 						big house
+			
+			+			:		正则表达式元字符扩展集中的一部分,它表示"一个或更多"。因此，包含一个或多个数字序列的行将被看做是一个整数。
 
+						root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat awksrc
+						/[0-9 ]+/       { print "This is an integer" }
+						/[A-Za-z]+/     { print "This is a string" }
+						/^$/            { print "This is a blank line." }
+						root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo "123" | awk -f awksrc
+						This is an integer
+						
+						
 			
 	构建单词类正则表达式:
 			<word>	:	匹配单词开始处和结束处的字符串
@@ -506,6 +518,90 @@ sed的基本命令:
 			
 			128page
 	
+
+
+	
+	
+	
+
+awk程序运行逻辑
+	BEGIN		:
+	主循环		:
+	END			:
+						
+								
+								--------------
+								|            |/		在读入任何输入前,执行第一个例程。
+								|			 |------------------------------------------------------
+								|  BEGIN     |\
+								|------------|
+								|			 |/		在读入每个输入行时执行第二个例程：主循环例程
+								|			 |------------------------------------------------------
+								|			 |\
+								|			 |
+								--------------
+								|            |/		在所有的输入完成后,执行第三个例程。
+								|   END      |------------------------------------------------------
+								|------------|\
+
+
+	A) awk中的模式匹配:
+		即，当awk读入一输入行时，它试图匹配脚本中的每个模式匹配规则，只有与一个特定的模式相匹配才能成为操作对象。
+		如果没有指定操作，与模式相匹配的输入行将被打印出来(执行打印语句是一个默认操作)
+
+				示例: 若匹配空行，则插入一行字符串。
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo "" | awk '/^$/ {print "This is a blank line."}'
+					This is a blank line.
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo "a" | awk '/^$/ {print "This is a blank line."}'
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk#
+		
+	B) 记录和字段
+		awk将每一行当做一个记录，每一行上的每个空格或者制表符分隔的单词作为字段(用来分隔字段的字符称为分隔符)。
+		
+		1) 字段的引用和分离:
+			$0 		:		整个记录
+			$1		:		第一个字段
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat names
+			John    Robinson        666-555-1111
+
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '{ print $2,$1,$3 }' names
+			Robinson John 666-555-1111
+			(print语句中分隔每个参数的逗号使得输出的各值之间有一个空格)
+		
+		2) 字段的另一个表示		:		可以用任何计算值为整数的表达式来表示一个字段，而不只是数字和变量。
+			我在使用awk初期，为了和shell一起使用，经常有这样的需求:另寻它法表示字段，但是很难用对。
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo a b c | awk 'BEGIN {one=1;two=2 }
+			> {print $(one + two)}'
+			c
+			
+		3) 改变字段分隔符  -F：		-F后跟分隔符
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -F"\t" '{print $2 }' names
+			Robinson
+
+			
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
