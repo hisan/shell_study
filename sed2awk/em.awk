@@ -1,3 +1,3 @@
 #BEGIN { FS = "\t" }
 BEGIN { FS = "[':\t]" }
-{ print $1,$2,$3,$4 }
+NF == 2 { print $1,$2,$3,$4 }

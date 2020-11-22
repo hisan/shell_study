@@ -638,9 +638,69 @@ awk程序运行逻辑
 								root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -f phonelist.awk seg.txt
 								John Robinson,MA 01760
 								Phyllis chapmqan,879-0900
+								
+								为FS赋值不影响当前输入行,它仅影响下一个输入行。
+								
 			
 		2) 第二种类型定义的变量的值可以用于报告或数据处理中。
-		
+			a)  OFS 		也是分隔符，不过是输出的分割符。
+			
+			b)  NF			当前输入记录的字段的个数
+				
+				引用NF,即$NF,等同于应用字段一样。
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat block.awk
+					# block.awk --打印第一个和最后一个字段
+					# $1 = name;$NF = phone number
+					BEGIN { FS = "\n"; RS = "" }
+					{print $1, $NF }	====================>>>NR此时经过输入主循环，已经为最后的行的计数值了。
+					
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat phones.block
+					John Robinson
+					Koren Inc.
+					978 Commonwaelth Ave.
+					Boston
+					MA 01760
+					696-0987
+					
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -f block.awk phones.block
+					John Robinson 696-0987
+
+			
+			c)  RS			记录分隔符(是记录！！！)	
+			
+			d)  ORS			输出...
+			
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat block.awk
+				# block.awk --打印第一个和最后一个字段
+				# $1 = name;$NF = phone number
+				BEGIN { FS = "\n"; RS = "" }
+				BEGIN { OFS = "\n"; ORS = "\n\n" }
+				{print $1, $NF }
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -f block.awk phones.block
+				John Robinson
+				696-0987
+
+				如上所示，为了能将输出结果输出到每一行，就将输出字段分隔符设置为\n，而输出记录设置为\n\n
+			
+			e)  FILENAME	包含当前输入文件的名称
+			
+			f)	FNR			应用于多个输入文件的情景，被用来表示与当前输入文件相关的当前记录的代码。
+			
+			g)	CONVFMT		用来控制数字到字符串的专业
+			
+			h)	NR			读入的输入记录的个数
+			
+							root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat phonelist.awk
+							# phonelist.awk --print name and tel
+							# input file: name company street city state state zip tel
+							BEGIN { FS = "," } #用逗号分隔字符
+
+							{ print $1 ","$6 }
+							END { print ""
+									print NR, "records processed." }
+						
+
+			
 		
 
 	D)  模式匹配的使用
@@ -782,29 +842,145 @@ awk程序运行逻辑
 		x += 1
 		x = x+1
 		++x
+
 		
-		
-		
-		
-		
-
-
-
-
-
-
+	G) 处理多行记录		: 	
 	
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat checkbook.awk
+			# checkbook.awk
+			BEGIN { FS = "\t" }
+
+			#1 期望第一条记录为初始余额
+			NR == 1 { print "Beginning Balance:\t"$1
+					balance = $1
+					next    #取得下一条记录！！！
+			}
+
+			#2 应用于每个支票记录，将余额和数量相加
+			{
+					print $1,$2,$3
+					print balance += $3     # 支票数额有负数
+			}
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -f checkbook.awk check.txt
+			Beginning Balance:      1000
+			125 market -125.45
+			874.55
+			126 Hardware Store -34.95
+			839.6
+			127 Video Store -7.45
+			832.15
+			128 Book Store -14.32
+			817.83
+			129 Gasoline -16.10
+			801.73
+			
+	H) 关系操作符合布尔操作符
+	
+		1) 关系操作符
+			<		:
+			>		:
+			<=		:
+			>=		:
+			==		:		相等
+					
+					
+				
+			!=		:
+			~		:		匹配
+			!~		:		不匹配
+		
+		2) 布尔操作符
+			||		:		或
+			&&		:		与
+			！		:		非
+		
+	I) 格式化打印
+		
+			printf	:		没有提供自动换行功能，必须明确地为它指定"\n"
+			
+			printf(format_expression[,argumnets])
+						 .				  .	
+						/|\              /|\
+						 |	              |	
+						 |                |---------->参数列表，例如：变量名列表，它和格式表达式相对应。
+                         |
+                         |
+                         |------------>第一部分，圆括号可选，用来描述格式的表达式。
+			
+			等同于c语言的sprintf(char *dststring,char *formart,...);
 
 
+		printf中的格式使用:
+		
+			printf使用的转义字符
 
+			转义字符			定义
+			   c	                字符
+			   s	                字符串
+			   d	                十进制整数
+			   ld	                十进制长整数
+			   u	                十进制无符号整数
+			   lu	                十进制无符号长整数
+			   x	                十六进制整数
+			   lx	                十六进制长整数
+			   o	                八进制整数
+			   lo	                八进制长整数
+			   e	                用科学记数法(e 记数法)表示的浮点数
+			   f	                浮点数
+			   g	                选用e或f中较短的一种形式
+			 
 
+			printf的修饰符
 
+			字符				定义
+			
+			-						左对齐修饰符
+			#						显示8 进制整数时在前面加个0
+									显示16 进制整数时在前面加0x
+			+						显示使用d 、e 、f 和g 转换的整数时，加上正负号+或-
+			0						用0而不是空白符来填充所显示的值
+			 
 
+			printf的格式说明符
 
+			格式说明符			功能
+			
+			%c						打印单个ASCII 字符
+									printf("The character is %c\n",x)
+									输出: The character is A
+									
+			%d						打印一个十进制数
+									printf("The boy is %d years old\n",y)
+									输出：The boy is 15 years old
+									
+			%e						打印数字的e 记数法形式
+									printf("z is %e\n",z) 		
+									输出: z is 2.3e+0 1
+			
+			%f						打印一个浮点数
+									printf("z is %f\n", 2.3 * 2)
+									输出: z is 4.600000
+			
+			%o						打印数字的八进制
+									printf("y is %o\n",y)
+									输出：z is 17
+			
+			%s						打印一个字符串
+									print("The name of the culprit is %s\n",$1)
+									输出：The name of the culprit is Bob Smith
+			
+			%x						打印数字的十六进制值
+									printf("y is %x\n",y)
+									输出：x is f
 
+	J) 向脚本传递参数		:		参数将值赋给一个变量，这个变量可以在awk脚本中访问。
+									这个变量可以在命令行上设置，放在脚本的后面，文件名的前面。
+		
+		awk 'script' var=value inputfile
 
-
-
+		这个一定要明白，awk的参数和shell的参数是不一样的，shell中参数1为$1,而awk中$1表示字段1。
+		
 
 
 
