@@ -580,15 +580,220 @@ awk程序运行逻辑
 			
 			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -F"\t" '{print $2 }' names
 			Robinson
+			
+			//文本
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat seg.txt
+			John Robinson,Koren,Inc.,978 4th Ave.,Boston,MA 01760,696-0987
+			Phyllis chapmqan,GVE Corp.,34 Sea Drive,Amesbury,MA 01881,879-0900
+			
+			//awk脚本
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat blocklist.awk
+			# blocklist .awk --use block type to print name and addr
+			# input a file: name、company、street、city、state、state zip、tel
+			{
+			print "" # output blank line
+			print $1  # name
+			print $2  # company
+			print $3  # street
+			print $4, $5 # city,state zip
+			}
+
+			//处理结果
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -f blocklist.awk seg.txt
+
+			John
+			Robinson,Koren,Inc.,978
+			4th
+			Ave.,Boston,MA 01760,696-0987
+
+			Phyllis
+			chapmqan,GVE
+			Corp.,34
+			Sea Drive,Amesbury,MA
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -F , -f blocklist.awk seg.txt
+
+			John Robinson
+			Koren
+			Inc.
+			978 4th Ave. Boston
+
+			Phyllis chapmqan
+			GVE Corp.
+			34 Sea Drive
+			Amesbury MA 01881
 
 			
+	C)  系统变量
+		1) 默认值可修改的系统变量
+		
+			a) FS 		:		字段分隔符，通过定义它来设置字段分隔符，所以它必须在BEGIN例程中设置。
+								
+								root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat phonelist.awk
+								# phonelist.awk --print name and tel
+								# input file: name company street city state state zip tel
+								BEGIN { FS = "," } #用逗号分隔字符  ======>>>BEGIN例程在主循环例程之前做操作
+
+								{ print $1 ","$6 }
+								root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -f phonelist.awk seg.txt
+								John Robinson,MA 01760
+								Phyllis chapmqan,879-0900
+			
+		2) 第二种类型定义的变量的值可以用于报告或数据处理中。
+		
+		
+
+	D)  模式匹配的使用
+		1) ~		:   操作符，用于测试一个字段的正则表达式，这个非常有用,指定一个字段去匹配，而非其他字段。
+		
+							root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat seg.txt
+							John Robinson,Koren,Inc.,978 4th Ave.,Boston,MA 01760,696-0987
+							Phyllis chapmqan,GVE Corp.,34 Sea Drive,Amesbury,MA 01881,879-0900
+							
+							root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '{print $5}' seg.txt
+							01760,696-0987
+							Drive,Amesbury,MA
+							
+							root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '$5 ~ /MA/ {print $1 "," $6 }' seg.txt
+							Phyllis,01881,879-0900
+							
+		2) !~		:	..., !用于反转~的含义。
+		
+							root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '$5 !~ /MA/ {print $1 "," $6 }' seg.txt
+							John,
+			
+							root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '$6 ~ /1?(-| )?\(?[0-9]+\)?( |-)?[0-9]+-[0-9]+/' seg.txt
+							Phyllis chapmqan,GVE Corp.,34 Sea Drive,Amesbury,MA 01881,879-0900
+
+							解释：
+							1?
+							(-| )?			查找一个连字符或一个空格，或者什么也没有
+							\(?
+							[0-9]+
+							\)?
+							( |-)?
+							[0-9]+-[0-9]+	查找在一个连字符两边的两组数字。======>>> 879-0900
 	
+	E) 字段的划分：完整的问题
+		
+		1) 用空格来分割字段
+			这种情况下，记录的前导空白字符和结尾空白字符将被忽略。
+		2)	使用单个字符来划分
+		3) 使用多个字符来做分隔符
+			此时，该分隔符将被作为一个正则表达式来解释。
+			 
+			 FS='\t',此时将\t作为字段分隔符
+			 FS='\t+',此时将一个或多个制表符来分隔字段。
+		
+			 
+			可以使用一个正则表达式指定几个字符分隔符
+			FS = "[':\t]"  	   ==============>>>>>    在【】中的三个字符之一都可以被解释成字段分隔符。
+			
+			这种用法很有用，因为待处理的字符并不总是成规律或者按照我们想要的成规律的,所以我们可以按照文本的大概的样式来设定切割方式。
+	
+	
+	F) 表达式	: 	
+		
+		1) 可以使用表达式来存储、操作和检索数据，这些操作与在sed中的有很大的区别，但这是大多数程序设计语言所具有的共同特性。
+		2) 一个表达式，通过计算返回一个值;
+		3) 表达式由数字和字符串常量、变量、操作符、函数和正则表达式组成。
+		
+		
+		1) 常量
+			a) 字符串型:
+				字符串，在表达式中必须用引号括起来。
+				
+					在字符串中可以使用下列转义序列。
+					\a		报警字符，通常是ASCII BEL字符
+					\b		退格键
+					\f		走纸符
+					\t		水平制表符	
+					\v		垂直制表符
+					\ddd 	将字符表示唯为1到3位八进制
+					\xhex	将字符表示为16进制。
+					\c		任何需要字面表示的字符。
+					\r		回车
+					\n		换行
+				
+			b) 整数型:
+		
+		2) 变量		: 变量是引用值的标识符;定义它,只需要为它定义一个名字并将数据赋给它即可。
+	
+			特点：
+				类型安全
+				区分大小写
+				不必初始化，awk自动将他们初始化为空字符串,如果作为数字，它的值为0。(理解这一点很重要，特别是写c/c++的程序员.)
+				
+				x = "hello"
+				
+				空格是字符串连接符
+				z = "hello" "world!"
+				
+		3) 表达式
+		
+		-----------------.
+		.	   .         .
+		.操作符.  描述   .
+		-----------------.
+		. +    .	     .
+		-----------------.
+		. -    .         .
+		-----------------.
+		. *    .         .
+		-----------------.
+		. /    .         .
+		-----------------.
+		. %    .  取模	 .
+		-------.---------.
+		. ^    .  取幂   .
+		-------.---------.
+		. **   .  取幂a  .
+		.------.---------.
+		
+		----------------------------
+		.	   .                   .
+		.操作符.  定义             .
+		---------------------------.
+		. ++   .  变量加1          .
+		---------------------------.
+		. --   .  变量减1          .
+		---------------------------.
+		. +=   .  加等于           .
+		---------------------------.
+		. -=   .                   .
+		---------------------------.
+		. *=   .  		           .
+		-------.-------------------.
+		. /=   .  		           .
+		-------.-------------------.
+		. %=   .  		           .
+		.------.-------------------.
+		. ^=   .  		           .
+		.------.-------------------.
+		. **=  . 	               .
+		.------.-------------------.
+		
+		x = 1
+		print x +  1  ===================>>> x == 2?  error 
+		
+		print x += 1  ===================>>> x == 2?  right
+		
+		
+		x += 1
+		x = x+1
+		++x
+		
+		
+		
+		
+		
 
 
 
 
 
 
+	
 
 
 

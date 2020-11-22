@@ -1,4 +1,187 @@
+脚本原则:可重用最优
 
+awk
+	+模式+过程
+sed
+
+sed
+
+	选项:			作用:
+	-n 				去掉sed默认的输出(sed会默认输出每一个输入行经处理后的输出。无论这个输入行是否被四配和操作)
+
+指定简单指令:
+
+	A 使用多重指令  				示例:
+	1) -e							sed -e 's/M/Message/p' -e 's/TB/NewBI/p'
+	2) ;							sed ‘s/M/MessAge/p;s/NB/NewBI/p' 			(此中用法，要注意只用一对引号)
+	3) 使用she11的分行 				回车换行(不实用)
+
+脚本文件:
+	sed -f script.flle
+
+awk
+
+			选项:								作用:
+
+			F								变更字段分隔符
+
+	注意事项:
+		1.指令必须在单引号中
+		2.awk将每一行当做一个记录，每一行上的每个空格分隔出来的当做每一个字段
+
+	A 使用多重指令								示例:
+
+		1) -e awk 'Iprint 61:print 42) sem.txt (此中用法，要注意只用一对单引号)
+
+		2) 使用shell的分行						回车换行(不实用)
+
+	B.模式匹配的使用
+	
+		1).同sed							root@zyb-ubt:~#: awk '/1355760 K/;/, 436624 K/' mem.txt
+											Mem: 1355760 K used, 677404 K tree, 47880 K ahrd, 52364 K buff, 436608 K cached
+											Mem: 1355588 K used, 677576 K free, 47880 K ahrd, 52412 K buff, 436624 K cached
+											Mem: 1355980 K used, 677184	K free, 47880 K shrd, 52412 K buff, 436624 K cached
+													
+
+	C.使用字段段分隔符选项
+			-F								root@zyb-ubt:~# awk -F'a' '{print $1;print $2;print $3;print $4;print $5;}' a.txt
+
+											jksncklo
+											csm
+											mkl;
+											vsdclknm
+											
+											root@zyb-ubt:~# cat a.txt
+											ajksnckloacsmamkl;avsdclknmajksncalscnlkacnalkcvnaca
+
+											
+一定要注意的:
+
+	1).[过程)
+	2).‘指令’
+	3)./正则表达式1
+
+正则表达式:
+
+	1) 字符串:		表明是首尾相邻的字符
+
+	2) 元字符
+			.	:	匹配任何一个字符
+			*	:	匹配它前面的任意个字符
+
+			[字符类]:	匹配字符类中的任何一个字符
+			
+				[] + ^(第一个) :	则不匹配[]中的任何一个字符
+				[] + -(连字符) :	表示匹配一个范围的字符类
+				[]]			   :	则表明]是字符类中的一个字符
+				
+				除以上字符外，其他字符在[]中，都表示是字符类而不再具有其他意义，比如*。
+			
+			^	:	正则表达式中，^指定匹配行的开始字符
+
+			$	:	...	, $指定匹配行的结尾字符
+			
+						root@zyb-ubt:~# cat abc.txt grep 'a$'
+						knacnasca
+						root@zyb-ubt:~# cat abc.txt grep '^a' 
+						abcklmalamcamscabcmkkascmlkascml kacmlamc
+						aa\asc!sdfvwle Eb#≤adviqwefredfbs db(sadcv)w
+						
+			?	:	匹配前面表达式的0或1次出现
+			
+			\(n,m\}		:		匹配它前面出现x次的单个字符
+
+				\{n)	:		x == n
+
+				\{n,\}	:		x >= n
+
+				\{n,m\}	:		m >= x >= n
+				
+
+			\			:	转义它之后跟的一个字符
+			
+			|			:	或,Astring|Bstring,即匹配Astring或者Bstring的匹配行
+			
+						root@zyb-ubt:~# cat ex.txt
+						big
+						big house
+						small
+						small car
+						root@zyb-ubt:~# sed -n '/house\|car/p' ex.txt
+						big house
+						small car
+			
+			()			:	分组操作，用于对正则表达式进行分组并设置优先级
+			
+						root@zyb-ubt:~# sed -n '/big/p' ex.txt
+						big
+						big house
+						
+						root@zyb-ubt:~# sed -n '/big\( house\)/p' ex.txt
+						big house
+			
+			+			:		正则表达式元字符扩展集中的一部分,它表示"一个或更多"。因此，包含一个或多个数字序列的行将被看做是一个整数。
+
+						root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat awksrc
+						/[0-9 ]+/       { print "This is an integer" }
+						/[A-Za-z]+/     { print "This is a string" }
+						/^$/            { print "This is a blank line." }
+						root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo "123" | awk -f awksrc
+						This is an integer
+						
+						
+			
+	构建单词类正则表达式:
+			<word>	:	匹配单词开始处和结束处的字符串
+						root@zyb-ubt:~# grep '\<car\>' ex.txt
+						small car
+						
+sed一次处理一行，不仅仅是处理，而是程序的设计，每次就从文本中读取一行，处理完后又读取下一行，这样就不用将所有文件内容读取到内存中导致占用大量内存空间了。
+sed的模式空间就是它用于读取输入、输入处理后存放的内存空间。
+这里有一个重点，这个空间是随时改变的。在多条命令的情况下，模式空间读入一行，要经过所有的命令处理后，才算真正的处理完，才会输出。
+
+sed默认处理单位为一行，也可以通过设置新的处理单位。
+
+
+
+	正则表达式	+	寻址
+		1) 没有地址		:		处理每一行
+
+		root@zyb-ubt:~# sed -n 'P' sample.txt
+		abc
+		def
+		ghi
+		jkl
+		mno
+		pqr
+		stu
+		vwx
+		yz
+
+		2) 一个地址		:		处理该地址代表的行
+								root@zyb-ubt:~# sed-n'1p' gample.txt
+								abc
+
+		3) 地址范围		:		处理该地址范围内的所有行
+								root@zyb-ubt:~# sed -n '1,3p* sample. txt
+								abc
+								def
+								ghi
+
+		4) 地址!		: 		处理除该地址以外的所有行
+								root@zyb-ubt:~# sed -n '1p' abc.txt
+								abc
+								
+								root@zyb-ubt:~# sed -n '1!p' abc.txt
+								def
+								ghi
+								jkl
+								mno
+								pqr
+								stu
+								vwx
+								yz
+								
 元字符汇总
 
 	\{n,m\}		:
@@ -42,6 +225,8 @@ POSIX类补充					匹配的字符
 	[:upper:]			大写字符
 	[:xdigit:]			十六进制数字
 	
+	
+
 sed的基本命令:
 
 	删除	d	:
@@ -332,52 +517,89 @@ sed的基本命令:
 		[address]n
 			
 			128page
-			
-
-				
 	
-				
 
 
+	
+	
+	
+
+awk程序运行逻辑
+	BEGIN		:
+	主循环		:
+	END			:
+						
+								
+								--------------
+								|            |/		在读入任何输入前,执行第一个例程。
+								|			 |------------------------------------------------------
+								|  BEGIN     |\
+								|------------|
+								|			 |/		在读入每个输入行时执行第二个例程：主循环例程
+								|			 |------------------------------------------------------
+								|			 |\
+								|			 |
+								--------------
+								|            |/		在所有的输入完成后,执行第三个例程。
+								|   END      |------------------------------------------------------
+								|------------|\
 
 
+	A) awk中的模式匹配:
+		即，当awk读入一输入行时，它试图匹配脚本中的每个模式匹配规则，只有与一个特定的模式相匹配才能成为操作对象。
+		如果没有指定操作，与模式相匹配的输入行将被打印出来(执行打印语句是一个默认操作)
+
+				示例: 若匹配空行，则插入一行字符串。
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo "" | awk '/^$/ {print "This is a blank line."}'
+					This is a blank line.
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo "a" | awk '/^$/ {print "This is a blank line."}'
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk#
 		
+	B) 记录和字段
+		awk将每一行当做一个记录，每一行上的每个空格或者制表符分隔的单词作为字段(用来分隔字段的字符称为分隔符)。
+		
+		1) 字段的引用和分离:
+			$0 		:		整个记录
+			$1		:		第一个字段
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat names
+			John    Robinson        666-555-1111
+
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '{ print $2,$1,$3 }' names
+			Robinson John 666-555-1111
+			(print语句中分隔每个参数的逗号使得输出的各值之间有一个空格)
+		
+		2) 字段的另一个表示		:		可以用任何计算值为整数的表达式来表示一个字段，而不只是数字和变量。
+			我在使用awk初期，为了和shell一起使用，经常有这样的需求:另寻它法表示字段，但是很难用对。
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# echo a b c | awk 'BEGIN {one=1;two=2 }
+			> {print $(one + two)}'
+			c
+			
+		3) 改变字段分隔符  -F：		-F后跟分隔符
+			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -F"\t" '{print $2 }' names
+			Robinson
+
 			
 	
-	
-	
-	
-	
-	
-	
+
+
+
+
 
 
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
-	
-	
-	
+
+
+
+
+
+
+
+
+
 
 
 
