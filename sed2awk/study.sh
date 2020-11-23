@@ -977,11 +977,15 @@ awk程序运行逻辑
 	J) 向脚本传递参数		:		参数将值赋给一个变量，这个变量可以在awk脚本中访问。
 									这个变量可以在命令行上设置，放在脚本的后面，文件名的前面。
 		
-		awk 'script' var=value inputfile
+		awk 'script' var=value inputfile  //严格要求，在=号的两边不允许出现空格。
 
 		这个一定要明白，awk的参数和shell的参数是不一样的，shell中参数1为$1,而awk中$1表示字段1。
 		
-
+		也可以使用命令行参数定义系统变量。
+			awk '{ print NR, $0 }' OFS=',' names
+	
+			
+		
 
 
 
