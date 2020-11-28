@@ -89,9 +89,9 @@ awk
 						
 			?	:	匹配前面表达式的0或1次出现
 			
-			\(n,m\}		:		匹配它前面出现x次的单个字符
+			\{n,m\}		:		匹配它前面出现x次的单个字符
 
-				\{n)	:		x == n
+				\{n\}	:		x == n
 
 				\{n,\}	:		x >= n
 
@@ -517,12 +517,11 @@ sed的基本命令:
 		[address]n
 			
 			128page
-	
 
+			
 
-	
-	
-	
+			
+一定要明确，sed、awk都是用来处理数据流的，所以一定要有输入，比如在命令行执行一定命 # awk '{print x += 1}',点击回车后，并没有执行，因为是在等待输入。
 
 awk程序运行逻辑
 	BEGIN		:
@@ -738,7 +737,9 @@ awk程序运行逻辑
 		
 		1) 用空格来分割字段
 			这种情况下，记录的前导空白字符和结尾空白字符将被忽略。
+			
 		2)	使用单个字符来划分
+		
 		3) 使用多个字符来做分隔符
 			此时，该分隔符将被作为一个正则表达式来解释。
 			 
@@ -981,14 +982,131 @@ awk程序运行逻辑
 
 		这个一定要明白，awk的参数和shell的参数是不一样的，shell中参数1为$1,而awk中$1表示字段1。
 		
-		也可以使用命令行参数定义系统变量。
-			awk '{ print NR, $0 }' OFS=',' names
+							(
+								也可以使用命令行参数定义系统变量。
+									awk '{ print NR, $0 }' OFS=',' names
+							)	
+		
+		这种传参的局限性以及改进
+		
+		局限性：
+			示例:
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat seg.txt
+					John Robinson,Koren,Inc.,978 4th Ave.,Boston,MA 01760,696-0987
+					Phyllis chapmqan,GVE Corp.,34 Sea Drive,Amesbury,MA 01881,879-0900
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat a.txt
+					ajksnckloacsmamklavsdclknmajksncalscnlkacnalkcvnaca
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk 'BEGIN {print n}
+					{ if (n==1) print "reading the 1 book"
+					if (n==2) print "reading the 2 book"
+					}' n=1 seg.txt n=2 a.txt
+
+					reading the 1 book
+					reading the 1 book
+					reading the 2 book
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk 'BEGIN {print n}
+					{ if (n==1) print "reading the 1 book"
+					if (n==2) print "reading the 2 book"
+					}' n=1 a.txt n=2 seg.txt
+
+					reading the 1 book
+					reading the 2 book
+					reading the 2 book
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk 'BEGIN {if (n==1)print n}' n=1 a.txt
+			------>>根据以上awk输出结果,可以看出，命令行传入的参数并不能再BEGIN例程中得以使用。
+			这是因为,从命令行传递的参数就像是被awk当做文件名的,赋值操作直到这个变量被求值时才进行。
+			这就造成，如果我们要在BEGIN例程中就要对参数有动作，那么这将不能得以实现。
+			
+		改进:
+			为了能在任何输入被读入前定义参数,-v选项指定在执行BEGIN过程之前得到变量赋值。-v选项必须在一个命令行脚本前说明。
+			
+				示例:
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '{print}' RS=' ' phones.block
+					John
+					Robinson
+					Koren
+					Inc.
+					978
+					Commonwaelth
+					Ave.
+					Boston
+					MA
+					01760
+					696-0987
+
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk RS=' ' '{print}' phones.block
+					awk: line 1: syntax error at or near end of line
+
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk -v n=1 'BEGIN {print n}
+					> {
+					> if (n==1) print "reading the first book"
+					> if (n==2) print "reading the second book"
+					> } ' seg.txt
+					1
+					reading the first book
+					reading the first book
+
+	
+	awk的编程结构
+	
+	
+	我们很多时候，都是在shell脚本中调用awk脚本来完成特定的逻辑，所以我们常常需要
+		1) 在shell中给awk传递参数。
+			传参两种方式:
+				a) awk -v argv="value" input.txt
+				b) awk -f "script" argv="value" input.txt
+				
+		2) 在awk中执行shell命令。
+			a) 使用函数 system()函数
+			system()函数执行一个以表达式给出的命令。
+			
+				示例1：
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat category.txt
+				/home/zyb
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '{cmd="ls -alt ";system(cmd $0)}' category.txt
+				总用量 128
+				drwxrwxrwx 12 root root 4096 11月 19 23:08 BASE_CODE
+				drwxrwxrwx 16 root root 4096 11月 14 17:57 CODE
+				drwxrwxrwx 24 root root 4096 11月  8 11:34 CPP_CODE_BASE
+				drwxr-xr-x  3 root root 4096 11月  8 10:37 ..
+				drwxrwxrwx 23 zyb  zyb  4096 11月  7 22:35 .
+				-rw-------  1 zyb  zyb   111 11月  1 23:17 .bash_history
+				drwxr-xr-x  5 root root 4096 11月  1 21:32 SHELL
+				drwx------  2 root root 4096 10月 30 21:52 test
+				-rw-------  1 zyb  zyb  1940 10月 25 15:56 .ICEauthority
+				drwx------  3 zyb  zyb  4096 10月 25 15:56 .gnupg
+				-rw-------  1 zyb  zyb    84 10月 25 15:56 .xsession-errors
+				-rw-------  1 zyb  zyb   104 10月 25 15:56 .Xauthority
+				drwxrwxrwx  2 root root 4096 10月 11 20:04 LITTLE_BIN
+				drwx------ 17 zyb  zyb  4096 9月  30 20:27 .config
+				-rw-------  1 zyb  zyb   582 9月  30 20:27 .xsession-errors.old
+				drwxrwxrwx  4 root root 4096 9月  20 21:13 DATABASE
+				drwxrwxrwx  3 root root 4096 8月   6 08:33 BOOK
+				drwxrwxrwx  8 root root 4096 7月  19 13:11 TOOL
+				drwxrwxrwx  2 root root 4096 7月  11 01:39 Person_Important
+				drwxrwxrwx  3 root root 4096 6月  15 23:38 OPEN_SOURCE
+				drwxrwxrwx  2 root root 4096 4月  19  2020 BLOG
+				drwxrwxrwx  2 root root 4096 4月  19  2020 LEANOVO
+				drwxrwxrwx  3 root root 4096 1月  15  2020 KERNEL
+				drwx------  9 zyb  zyb  4096 1月  12  2020 .cache
+				-rw-r--r--  1 zyb  zyb     0 1月   5  2020 .sudo_as_admin_successful
+				drwx------  2 zyb  zyb  4096 1月   5  2020 .gconf
+				drwx------  2 zyb  zyb  4096 1月   5  2020 .presage
+				drwx------  3 zyb  zyb  4096 1月   5  2020 .dbus
+				drwx------  3 zyb  zyb  4096 1月   5  2020 .local
+				-rw-r--r--  1 zyb  zyb    25 1月   5  2020 .dmrc
+				-rw-r--r--  1 zyb  zyb   220 1月   5  2020 .bash_logout
+				-rw-r--r--  1 zyb  zyb  3771 1月   5  2020 .bashrc
+				-rw-r--r--  1 zyb  zyb   655 1月   5  2020 .profile
+		
+		
+				示例2：
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk 'BEGIN{if (system("mkdir dale") != 0)print "failed";else print "ok" }'
+				ok
+
 	
 			
 		
-
-
-
 
 
 
