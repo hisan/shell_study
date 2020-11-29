@@ -512,14 +512,90 @@ sed的基本命令:
 			abcedf
 			3
 
-下一步 next next改变了正常的流控制，直到到达脚本的底部才会输出模式空间的内容。
-
-		[address]n
+下一步 next  (next改变了正常的流控制，直到到达脚本的底部才会输出模式空间的内容。)
+		
+		[address]n	
 			
-			128page
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat mail.txt
+			.Hi "On Egypt"
 
+			Napopleon,pointing to the Pyramids,siad to his troops:
+			.Soldiers, forty centuries have their eyes upon you.
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '/^\.Hi/{
+			n
+			/^$/d
+			}' mail.txt
+			.Hi "On Egypt"
+			Napopleon,pointing to the Pyramids,siad to his troops:
+			.Soldiers, forty centuries have their eyes upon you.
 			
+		综上:next输出当前模式空间的内容，然后读取输入的下一行，而不返回脚本的顶端。
+		思考一下，这个next命令，能有什么用处呢？目前我只想到用于对和某个模式匹配的行的下一行做一些其他的操作。
 
+		
+		
+高级sed命令:(改变了执行或控制命令的流程顺序)
+	1.处理多行模式空间：(分别对应于单行模式空间的n,d,p)
+		a) N	:	通过读取新的输入行，并将它添加到模式空间的现有内容之后，来创建多行模式空间。
+					模式空间最初的内容和新的输入行之间用换行符分隔。在模式空间中嵌入的换行符可以利用转义序列“\n”来匹配。在多行模式空间中，
+			
+					
+			示例1：
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat m2.txt
+					.Hi "On Egypt"
+					anacnk
+					Napopleon,pointing to the Pyramids,siad to his troops:
+					.Soldiers, forty centuries have their eyes upon you.
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '/anacnk$/{
+					N
+					s/anacnk\nNapopleon/a big/
+					}' m2.txt
+					.Hi "On Egypt"
+					a big,pointing to the Pyramids,siad to his troops:
+					.Soldiers, forty centuries have their eyes upon you.
+				
+				可见，N将下一行加入当前模式空间形成多行模式空间，并在模式空间中，进行了跨行的替换。
+				所以从程序设计的角度，可以猜测sed支持多行模式空间的根本不在于何种命令，而在与多行模式空间是否可以被创建。
+				
+					
+				
+			
+			
+			多行模式空间中:
+				^	匹配模式空间中的第一个字符,而不匹配任何嵌入的换行符。
+				$	...				最后的换行符,	...
+				
+			
+			在执行next命令之后,控制将被传递给脚本中的命令.
+			
+		b) D	:	D是d的多行形式，d删除模式空间的内容，D只删除多行模式空间的第一行。
+			
+			D删除模式空间中直到第一个嵌入的换行符的这部分内容。它不会导致读入新的输入行,相反，它返回到脚本的顶端，将这些指令应用于模式空间剩余的内容。
+		
+			阅读索引: 146
+			
+		
+		c) P
+		
+	2.采用保持空间啦保存模式空间的内容并使它可用于后续的命令
+		a) H 
+		
+		b) h
+		
+		c) G
+		
+		d) g
+		
+		e) x
+		
+	3.编写使用分支和条件命令的脚本了；唉更改控制流
+		a):
+		
+		b)b
+		
+		c)t
+	
+			
 			
 一定要明确，sed、awk都是用来处理数据流的，所以一定要有输入，比如在命令行执行一定命 # awk '{print x += 1}',点击回车后，并没有执行，因为是在等待输入。
 
