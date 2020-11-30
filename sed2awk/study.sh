@@ -532,7 +532,55 @@ sed的基本命令:
 		综上:next输出当前模式空间的内容，然后读取输入的下一行，而不返回脚本的顶端。
 		思考一下，这个next命令，能有什么用处呢？目前我只想到用于对和某个模式匹配的行的下一行做一些其他的操作。
 
+读写文件 w/r
+	[line-address]r infile			:	r将指定文本的内容读入到模式空间,它不能对一个范围内的行进行操作
+	[address]w outfile				:	w将模式空间的内容写入到file中
+
+		r示例:
+		root@zyb-ubt:/home/zyb/SHELL# cat a.txt
+		abcd
+		efgh
 		
+		root@zyb-ubt:/home/zyb/SHELL# cat num.txt
+		123
+		
+		root@zyb-ubt:/home/zyb/SHELL# sed '/\<abcd\>/r num.txt' a.txt
+		abcd
+		123			--->>> (匹配到abed后，读入了num.txt中的内容到模式空间)
+		efgh
+
+		w示例:
+		root@zyb-ubt:/home/zyb/SHELL# sed'/\<abcd\>/w insert.txt' a.txt
+		
+		root@zyb-ubt:/home/zyb/SHELL# cat insert.txt
+		abcd
+		
+	重要应用场景说明：
+		若有一个统计人信息的文本,这个信息每一行包含:姓名、性别、家乡...,如果需要将这些属性分别写入到不同的文件中，那么此时的w就很有用
+			sed -n '/姓名/w 姓名.txt;/性别/w 性别.txt' 普查文本.txt
+
+退出q	: 	使sed停止读取新的输入行，并停止将它们发送到输出。
+	[line-address]q
+
+	root@zyb-ubt:/home/zyb/SHELL# cat repeat.txt
+	abc
+	abc
+	abedef
+	wwwka
+	acmasca
+	acaaacaca
+	acackasc
+
+	root@zyb-ubt :/home/zyb/SHELL# sed '/a/q' repeat.txt
+	abc
+
+	root@zyb-ubt:/home/ zyb/SHELL# sed '4q' repeat.txt
+	abc
+	abc
+	abedef
+	wwwka
+	
+	重要应用场景说明:	若我们使用sed只是为了某个操作，比如查找到某个字符串、删除了某个字符串后，就停止脚本，那么q是非常有用的。
 		
 高级sed命令:(改变了执行或控制命令的流程顺序)
 	1.处理多行模式空间：(分别对应于单行模式空间的n,d,p)
@@ -591,17 +639,16 @@ sed的基本命令:
 		b)b
 		
 		c)t
-	
-			
-			
+		
 一定要明确，sed、awk都是用来处理数据流的，所以一定要有输入，比如在命令行执行一定命 # awk '{print x += 1}',点击回车后，并没有执行，因为是在等待输入。
+
+awk的底层为使用它的人定义并提供了一个模型，这个模型就是主输入循环。一定要理解这个awk的基本模型，不然用awk的时候就总会受到其他开发语言的影响。
 
 awk程序运行逻辑
 	BEGIN		:
 	主循环		:
 	END			:
-						
-								
+	
 								--------------
 								|            |/		在读入任何输入前,执行第一个例程。
 								|			 |------------------------------------------------------
@@ -616,7 +663,13 @@ awk程序运行逻辑
 								|   END      |------------------------------------------------------
 								|------------|\
 
-
+	awk程序的三部分:
+		1) 处理输入前将做的处理
+		2) 处理输入中将做的处理
+		3) 处理输入完成后将做的处理
+					
+		要理解这三个过程，理解以后写的awk程序才能按照所设想的那样得到处理结果
+		
 	A) awk中的模式匹配:
 		即，当awk读入一输入行时，它试图匹配脚本中的每个模式匹配规则，只有与一个特定的模式相匹配才能成为操作对象。
 		如果没有指定操作，与模式相匹配的输入行将被打印出来(执行打印语句是一个默认操作)
@@ -1119,62 +1172,8 @@ awk程序运行逻辑
 					reading the first book
 					reading the first book
 
-	我们很多时候，都是在shell脚本中调用awk脚本来完成特定的逻辑，所以我们常常需要
-		1) 在shell中给awk传递参数。
-			传参两种方式:
-				a) awk -v argv="value" input.txt
-				b) awk -f "script" argv="value" input.txt
-				
-		2) 在awk中执行shell命令。
-			a) 使用函数 system()函数
-			system()函数执行一个以表达式给出的命令。
-			
-				示例1：
-				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat category.txt
-				/home/zyb
-				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '{cmd="ls -alt ";system(cmd $0)}' category.txt
-				总用量 128
-				drwxrwxrwx 12 root root 4096 11月 19 23:08 BASE_CODE
-				drwxrwxrwx 16 root root 4096 11月 14 17:57 CODE
-				drwxrwxrwx 24 root root 4096 11月  8 11:34 CPP_CODE_BASE
-				drwxr-xr-x  3 root root 4096 11月  8 10:37 ..
-				drwxrwxrwx 23 zyb  zyb  4096 11月  7 22:35 .
-				-rw-------  1 zyb  zyb   111 11月  1 23:17 .bash_history
-				drwxr-xr-x  5 root root 4096 11月  1 21:32 SHELL
-				drwx------  2 root root 4096 10月 30 21:52 test
-				-rw-------  1 zyb  zyb  1940 10月 25 15:56 .ICEauthority
-				drwx------  3 zyb  zyb  4096 10月 25 15:56 .gnupg
-				-rw-------  1 zyb  zyb    84 10月 25 15:56 .xsession-errors
-				-rw-------  1 zyb  zyb   104 10月 25 15:56 .Xauthority
-				drwxrwxrwx  2 root root 4096 10月 11 20:04 LITTLE_BIN
-				drwx------ 17 zyb  zyb  4096 9月  30 20:27 .config
-				-rw-------  1 zyb  zyb   582 9月  30 20:27 .xsession-errors.old
-				drwxrwxrwx  4 root root 4096 9月  20 21:13 DATABASE
-				drwxrwxrwx  3 root root 4096 8月   6 08:33 BOOK
-				drwxrwxrwx  8 root root 4096 7月  19 13:11 TOOL
-				drwxrwxrwx  2 root root 4096 7月  11 01:39 Person_Important
-				drwxrwxrwx  3 root root 4096 6月  15 23:38 OPEN_SOURCE
-				drwxrwxrwx  2 root root 4096 4月  19  2020 BLOG
-				drwxrwxrwx  2 root root 4096 4月  19  2020 LEANOVO
-				drwxrwxrwx  3 root root 4096 1月  15  2020 KERNEL
-				drwx------  9 zyb  zyb  4096 1月  12  2020 .cache
-				-rw-r--r--  1 zyb  zyb     0 1月   5  2020 .sudo_as_admin_successful
-				drwx------  2 zyb  zyb  4096 1月   5  2020 .gconf
-				drwx------  2 zyb  zyb  4096 1月   5  2020 .presage
-				drwx------  3 zyb  zyb  4096 1月   5  2020 .dbus
-				drwx------  3 zyb  zyb  4096 1月   5  2020 .local
-				-rw-r--r--  1 zyb  zyb    25 1月   5  2020 .dmrc
-				-rw-r--r--  1 zyb  zyb   220 1月   5  2020 .bash_logout
-				-rw-r--r--  1 zyb  zyb  3771 1月   5  2020 .bashrc
-				-rw-r--r--  1 zyb  zyb   655 1月   5  2020 .profile
-		
-		
-				示例2：
-				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk 'BEGIN{if (system("mkdir dale") != 0)print "failed";else print "ok" }'
-				ok
 
-	
-			
+					
 awk程序设计逻辑:
 	A)条件
 		if (expression)
@@ -1251,61 +1250,95 @@ awk程序设计逻辑:
 
 	D) 常用函数
 
-	1)
-		n = split (input string, array,seperator);
-										/|\
-										 |
-										 |
-						                 |
-						                 |
-						                 |
-						                 |
-						                 |
-						                 |
-						                 .--------------------> 1) 若seperator没指定，则默认为$FS
-																2) seperator可为正则表达式
-																
-	2)  exp(x) 		e的x次幂
-		sqrt (x)
+		1)
+			n = split (input string, array,seperator);
+											/|\
+											 |
+											 |
+											 |
+											 |
+											 .-----------> 1) 若seperator没指定，则默认为$FS
+																	2) seperator可为正则表达式
+		2)  exp(x) 		e的x次幂
+			sqrt (x)
+			int(x) 		x的整数截断
+			rand()		返回随机数x, 0<=x<1
+			srand(x)	为rand()产生新的种子数，使得rand()被多次调用时能产生真正的随机数。
 
-		int(x) 		x的整数截断
-
-		rand()		返回随机数x, 0<=x<1
-
-		srand(x)	为rand()产生新的种子数，使得rand()被多次调用时能产生真正的随机数。
-
-	3) 字符串函数
-	
-		geub(exreg, substring, mainstring)  //用substring替换mainstring 中和正则表达式exreg匹配的所有字符串
-		sub(exreg, substring, mainstring) 	//替换mainstring中首次匹配exreg的substring
-		substr(malnstring,p, n)				//返回mainstring中从p处开始的长度为n的字符串
-		index(mainstring,substring)			//返回substring在mainstring中的位置
-		length(mainstring)					//返回mainstring的长度
-		match(exreg, mainstring)			//若mainstring中有匹配正则表达式exreg,则返回首次匹配的字符的起始位置
-		tolower(mainstring)					//转大写
-		toupper(mainstring)					//转小写
+		3) 字符串函数
 		
-	4) 自定义函数
-	
-		function insert(argv_1,argv_2)
-		{
-			action_1
-			action_2
-			...
-		}
-	5) getline <<=========>> next
-	
-	
+			geub(exreg, substring, mainstring)  //用substring替换mainstring 中和正则表达式exreg匹配的所有字符串
+			sub(exreg, substring, mainstring) 	//替换mainstring中首次匹配exreg的substring
+			substr(malnstring,p, n)				//返回mainstring中从p处开始的长度为n的字符串
+			index(mainstring,substring)			//返回substring在mainstring中的位置
+			length(mainstring)					//返回mainstring的长度
+			match(exreg, mainstring)			//若mainstring中有匹配正则表达式exreg,则返回首次匹配的字符的起始位置
+			tolower(mainstring)					//转大写
+			toupper(mainstring)					//转小写
+			
+		4) 自定义函数
 		
-
-
-
-
-
-
-
-
-
-
-
-	
+			function insert(argv_1,argv_2)
+			{
+				action_1
+				action_2
+				...
+			}
+		5) getline <<=========>> next
+		
+	我们很多时候，都是在shell脚本中调用awk脚本来完成特定的逻辑，所以我们常常需要
+		1) 在shell中给awk传递参数。
+			传参两种方式:
+				a) awk -v argv="value" input.txt
+				b) awk -f "script" argv="value" input.txt
+				
+		2) 在awk中执行shell命令。
+			a) 使用函数 system()函数
+			system()函数执行一个以表达式给出的命令。
+			
+				示例1：
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat category.txt
+				/home/zyb
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk '{cmd="ls -alt ";system(cmd $0)}' category.txt
+				总用量 128
+				drwxrwxrwx 12 root root 4096 11月 19 23:08 BASE_CODE
+				drwxrwxrwx 16 root root 4096 11月 14 17:57 CODE
+				drwxrwxrwx 24 root root 4096 11月  8 11:34 CPP_CODE_BASE
+				drwxr-xr-x  3 root root 4096 11月  8 10:37 ..
+				drwxrwxrwx 23 zyb  zyb  4096 11月  7 22:35 .
+				-rw-------  1 zyb  zyb   111 11月  1 23:17 .bash_history
+				drwxr-xr-x  5 root root 4096 11月  1 21:32 SHELL
+				drwx------  2 root root 4096 10月 30 21:52 test
+				-rw-------  1 zyb  zyb  1940 10月 25 15:56 .ICEauthority
+				drwx------  3 zyb  zyb  4096 10月 25 15:56 .gnupg
+				-rw-------  1 zyb  zyb    84 10月 25 15:56 .xsession-errors
+				-rw-------  1 zyb  zyb   104 10月 25 15:56 .Xauthority
+				drwxrwxrwx  2 root root 4096 10月 11 20:04 LITTLE_BIN
+				drwx------ 17 zyb  zyb  4096 9月  30 20:27 .config
+				-rw-------  1 zyb  zyb   582 9月  30 20:27 .xsession-errors.old
+				drwxrwxrwx  4 root root 4096 9月  20 21:13 DATABASE
+				drwxrwxrwx  3 root root 4096 8月   6 08:33 BOOK
+				drwxrwxrwx  8 root root 4096 7月  19 13:11 TOOL
+				drwxrwxrwx  2 root root 4096 7月  11 01:39 Person_Important
+				drwxrwxrwx  3 root root 4096 6月  15 23:38 OPEN_SOURCE
+				drwxrwxrwx  2 root root 4096 4月  19  2020 BLOG
+				drwxrwxrwx  2 root root 4096 4月  19  2020 LEANOVO
+				drwxrwxrwx  3 root root 4096 1月  15  2020 KERNEL
+				drwx------  9 zyb  zyb  4096 1月  12  2020 .cache
+				-rw-r--r--  1 zyb  zyb     0 1月   5  2020 .sudo_as_admin_successful
+				drwx------  2 zyb  zyb  4096 1月   5  2020 .gconf
+				drwx------  2 zyb  zyb  4096 1月   5  2020 .presage
+				drwx------  3 zyb  zyb  4096 1月   5  2020 .dbus
+				drwx------  3 zyb  zyb  4096 1月   5  2020 .local
+				-rw-r--r--  1 zyb  zyb    25 1月   5  2020 .dmrc
+				-rw-r--r--  1 zyb  zyb   220 1月   5  2020 .bash_logout
+				-rw-r--r--  1 zyb  zyb  3771 1月   5  2020 .bashrc
+				-rw-r--r--  1 zyb  zyb   655 1月   5  2020 .profile
+		
+		
+				示例2：
+				root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# awk 'BEGIN{if (system("mkdir dale") != 0)print "failed";else print "ok" }'
+				ok
+				
+				
+				
