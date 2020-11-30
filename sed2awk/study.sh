@@ -557,10 +557,7 @@ sed的基本命令:
 				可见，N将下一行加入当前模式空间形成多行模式空间，并在模式空间中，进行了跨行的替换。
 				所以从程序设计的角度，可以猜测sed支持多行模式空间的根本不在于何种命令，而在与多行模式空间是否可以被创建。
 				
-					
 				
-			
-			
 			多行模式空间中:
 				^	匹配模式空间中的第一个字符,而不匹配任何嵌入的换行符。
 				$	...				最后的换行符,	...
@@ -1122,10 +1119,6 @@ awk程序运行逻辑
 					reading the first book
 					reading the first book
 
-	
-	awk的编程结构
-	
-	
 	我们很多时候，都是在shell脚本中调用awk脚本来完成特定的逻辑，所以我们常常需要
 		1) 在shell中给awk传递参数。
 			传参两种方式:
@@ -1182,20 +1175,128 @@ awk程序运行逻辑
 
 	
 			
+awk程序设计逻辑:
+	A)条件
+		if (expression)
+			action1
+		[else
+			action2]
+
+		使用注意事项:
+			1). 如果操作由多个语句组成，则要用一对大括号括起来。
+
+			if (expression) { 		----------------------->左括号可与expression一行,也可下一行单独一行，也可与第一条语句一行
+			action1 s1
+			action1_s2
+			...
+			} --------------------->右括号可与最后一条语句一行也可下一行;总之与c语言的用法一致
+			[else	---------------------> 也可以这样[else action2]
+				action2]
+
+			if (expression) action_s1; [else action2]
+			if (expression) (action_s1;action1 s2;action1 _3:)leise action2] //使用多个分号分隔多个语句，必须使用大括号
+
+		使用示例:
+			1).1f (x ~ /[Yy](es)?/) print x
+				测试x是否与一个模式匹配
+
+			2) .awk也支持条件运算符
+			grade = ( avg>=65 )?"Pass":"Fail"
+
+	B) 循环
+
+		1). while循环
+
+			a)	while (condition)
+				action
+			b)	while (condition)action
+
+			c)	while (condition)
+				{
+					action1
+					action 2
+					...
+				}
+				
+			d) Do循环
+
+				do
+					action
+				while (condition)
+
+				do act1on wh1le (condit1on)
+
+			e) for循环
+
+				for (a;b;c) action
+
+
+	C) 数组----------关联数组(类似于c++的map, 可以建立很多种类型的键值对之间的匹配关系)
+		1) awk中的关键:
+			a) 不用指定数组大小.要谨记这条规则
+			
+			示例:
+			acro["BASIC"] = "Beginner's All-Purpose Symbolic Instruction Code"
 		
+		2) 测试某个值是否是数组中的成员
+			item in array <<=-=>> array[item]存在则返回1，否 则返回o
 
+		3) 删除数组中的一个元素
+			delete array[subscript]
 
+		4) awk不支持多维数组，只能使用模拟方式来应用多维数组
 
+			file array[NR,1]
+				file array[2,4] <<======>> 即文本中第二行记录的第四个字段。
 
+	D) 常用函数
 
+	1)
+		n = split (input string, array,seperator);
+										/|\
+										 |
+										 |
+						                 |
+						                 |
+						                 |
+						                 |
+						                 |
+						                 |
+						                 .--------------------> 1) 若seperator没指定，则默认为$FS
+																2) seperator可为正则表达式
+																
+	2)  exp(x) 		e的x次幂
+		sqrt (x)
 
+		int(x) 		x的整数截断
 
+		rand()		返回随机数x, 0<=x<1
 
+		srand(x)	为rand()产生新的种子数，使得rand()被多次调用时能产生真正的随机数。
 
-
-
-
-
+	3) 字符串函数
+	
+		geub(exreg, substring, mainstring)  //用substring替换mainstring 中和正则表达式exreg匹配的所有字符串
+		sub(exreg, substring, mainstring) 	//替换mainstring中首次匹配exreg的substring
+		substr(malnstring,p, n)				//返回mainstring中从p处开始的长度为n的字符串
+		index(mainstring,substring)			//返回substring在mainstring中的位置
+		length(mainstring)					//返回mainstring的长度
+		match(exreg, mainstring)			//若mainstring中有匹配正则表达式exreg,则返回首次匹配的字符的起始位置
+		tolower(mainstring)					//转大写
+		toupper(mainstring)					//转小写
+		
+	4) 自定义函数
+	
+		function insert(argv_1,argv_2)
+		{
+			action_1
+			action_2
+			...
+		}
+	5) getline <<=========>> next
+	
+	
+		
 
 
 
