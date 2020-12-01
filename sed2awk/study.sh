@@ -57,9 +57,9 @@ awk
 											
 一定要注意的:
 
-	1).[过程)
-	2).‘指令’
-	3)./正则表达式1
+	1) [过程)
+	2) '指令'
+	3) /正则表达式/
 
 正则表达式:
 
@@ -159,11 +159,11 @@ sed默认处理单位为一行，也可以通过设置新的处理单位。
 		yz
 
 		2) 一个地址		:		处理该地址代表的行
-								root@zyb-ubt:~# sed-n'1p' gample.txt
+								root@zyb-ubt:~# sed-n '1p' gample.txt
 								abc
 
 		3) 地址范围		:		处理该地址范围内的所有行
-								root@zyb-ubt:~# sed -n '1,3p* sample. txt
+								root@zyb-ubt:~# sed -n '1,3p' sample. txt
 								abc
 								def
 								ghi
@@ -197,7 +197,7 @@ grep之后的模式为啥要加引号？因为是为了将模式作为grep的参
 
 元字符详解：
 	[字符类]		对通配符的改进,列出要匹配的字符，而不是匹配特殊位置的任意字符
-		(所以,字符类的匹配结果，情况更多是组合而不是唯一。)
+		(所以,字符类的匹配结果,情况更多是组合而不是唯一.)
 		
 		-		:	连字符
 		
@@ -205,13 +205,13 @@ grep之后的模式为啥要加引号？因为是为了将模式作为grep的参
 		由此，比如我们为了匹配加减乘除，我们应该为[-+*/]或者[+*/-]，当然，我们也可以使用\-来转义，但是比较乱。
 		它也可以在字符类中混合其他字符一起用，如[a-z?,.;']
 		
-多个字符类的使用：
-	[exp1][exp2],则是递进关系，即先由exp1过滤,再由exp2过滤.
+多个字符类的使用:
+	[exp1][exp2],则是递进关系,即先由exp1过滤,再由exp2过滤.
 	
 	
 POSIX类补充					匹配的字符		
 
-字符类:		由[:字符类:]组成
+字符类:				由[:字符类:]组成
 	[:alnum:]			可打印的字符
 	[:alpha:]			字母字符
 	[:blank:]			空格和制表符	
@@ -219,7 +219,7 @@ POSIX类补充					匹配的字符
 	[:digit:]			数字字符
 	[:graph:]			可打印的和可见的(非空格)字符
 	[:lower:]			小写字符
-	[:print:]			可打印的字符（包括空白字符）
+	[:print:]			可打印的字符(包括空白字符)
 	[:punct:]			标点符号字符
 	[:space:]			空白字符
 	[:upper:]			大写字符
@@ -421,14 +421,14 @@ sed的基本命令:
 	追加、插入命令只应用于单个行地址，更改命令可以处理一个范围内的行。
 	
 		1) 更改
-			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat email_t.txt
+			root@zyb-ubt:cat email_t.txt
 			From: Linus Torvalds <torvalds@linux-foundation.org>
 			Newsgroups: fa.linux.kernel
 			Subject: Re: [git pull][resend] Input updates for 2.6.22-rc7
 			Date: Thu, 05 Jul 2007 23:09:49 UTC
 			Message-ID: <fa.dJLARsFLFkz9Isp0gVJ6B6Vlk8I@ifi.uio.no>
 
-			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '/^From/,/^$/c\
+			root@zyb-ubt:sed '/^From/,/^$/c\
 			<Mail Header Removed>' email_t.txt
 			<Mail Header Removed>
 			
@@ -615,9 +615,12 @@ sed的基本命令:
 			
 		b) D	:	D是d的多行形式，d删除模式空间的内容，D只删除多行模式空间的第一行。
 			
-			D删除模式空间中直到第一个嵌入的换行符的这部分内容。它不会导致读入新的输入行,相反，它返回到脚本的顶端，将这些指令应用于模式空间剩余的内容。
+			D删除模式空间中直到第一个嵌入的换行符的这部分内容。它不会导致读入新的输入行。
+			相反，它返回到脚本的顶端，将这些指令应用于模式空间剩余的内容。
+			
+			
 		
-			阅读索引: 146
+			
 			
 		
 		c) P
@@ -633,7 +636,7 @@ sed的基本命令:
 		
 		e) x
 		
-	3.编写使用分支和条件命令的脚本了；唉更改控制流
+	3.编写使用分支和条件命令的脚本,以更改控制流
 		a):
 		
 		b)b
