@@ -583,12 +583,42 @@ sed的基本命令:
 	重要应用场景说明:	若我们使用sed只是为了某个操作，比如查找到某个字符串、删除了某个字符串后，就停止脚本，那么q是非常有用的。
 		
 高级sed命令:(改变了执行或控制命令的流程顺序)
+
 	1.处理多行模式空间：(分别对应于单行模式空间的n,d,p)
+	
 		a) N	:	通过读取新的输入行，并将它添加到模式空间的现有内容之后，来创建多行模式空间。
-					模式空间最初的内容和新的输入行之间用换行符分隔。在模式空间中嵌入的换行符可以利用转义序列“\n”来匹配。在多行模式空间中，
-			
+					模式空间最初的内容和新的输入行之间用换行符分隔。在模式空间中嵌入的换行符可以利用转义序列“\n”来匹配。
 					
-			示例1：
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed -f sed.blank test.txt
+					1 line
+
+					2 line
+
+					3 line
+					4 line
+
+					end
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat test.txt
+					1 line
+
+					2 line
+
+					3 line
+
+
+					4 line
+
+
+
+
+
+					end
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat sed.blank
+					/^$/{	=================>>> 匹配空行后，由于N,所以该空行便被加入模式空间。且与模式空间中的内容以换行符分隔。
+					N
+					/^\n$/d =================>>> 由于N创建了多行模式空间，所以在^匹配多行模式空间中的第一个字符,$匹配多行模式空间中的最后一个字符
+					}
+			示例1:
 					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat m2.txt
 					.Hi "On Egypt"
 					anacnk
@@ -618,12 +648,40 @@ sed的基本命令:
 			D删除模式空间中直到第一个嵌入的换行符的这部分内容。它不会导致读入新的输入行。
 			相反，它返回到脚本的顶端，将这些指令应用于模式空间剩余的内容。
 			
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat sed.blank
+			/^$/{
+			N
+			/^\n$/D	=================>>>//使用D,和d比起来,D只删除多行模式空间的第一行,而不是整个模式空间
+			}
+
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed -f sed.blank test.txt
+			1 line
+
+			2 line
+
+			3 line
+
+			4 line
+
+			end
+			root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat test.txt
+			1 line
+
+			2 line
+
+			3 line
+
+
+			4 line
+
+
+
+			end
+
+			c) P		多行打印命令与p不同，P输出多行模式空间的第一部分,直到第一个嵌入的换行符位置。
+						在执行完脚本中的最后一个命令之后，模式空间的内容自动输出。
 			
-		
 			
-			
-		
-		c) P
 		
 	2.采用保持空间啦保存模式空间的内容并使它可用于后续的命令
 		a) H 
