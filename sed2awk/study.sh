@@ -12,9 +12,43 @@ sed
 指定简单指令:
 
 	A 使用多重指令  				示例:
-	1) -e							sed -e 's/M/Message/p' -e 's/TB/NewBI/p'
-	2) ;							sed ‘s/M/MessAge/p;s/NB/NewBI/p' 			(此中用法，要注意只用一对引号)
-	3) 使用she11的分行 				回车换行(不实用)
+		1) -e							sed -e 's/M/Message/p' -e 's/TB/NewBI/p'
+		2) ;							sed 's/M/MessAge/p;s/NB/NewBI/p' 			(此中用法，要注意只用一对引号)
+		3) 使用she11的分行 				回车换行,此种用法比较常用的就是条件操作，即匹配摸个模式后再执行其他的操作。
+		
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# cat test.txt
+					1 line
+
+					2 line
+
+					3 line
+
+
+					4 line
+
+
+
+					end
+					
+					root@zyb-ubt:/home/zyb/CODE/SHELL/shell_study/sed2awk# sed '/1 line/{
+					a\
+					aaaaaaaaaaaaaa
+					}' test.txt
+					1 line
+					aaaaaaaaaaaaaa
+
+					2 line
+
+					3 line
+
+
+					4 line
+
+
+
+					end
+
+		
 
 脚本文件:
 	sed -f script.flle
@@ -33,7 +67,7 @@ awk
 
 		1) -e awk 'Iprint 61:print 42) sem.txt (此中用法，要注意只用一对单引号)
 
-		2) 使用shell的分行						回车换行(不实用)
+		2) 使用shell的分行			
 
 	B.模式匹配的使用
 	
